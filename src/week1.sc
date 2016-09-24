@@ -156,4 +156,42 @@ object week1 {
   // get all the primes
   ((d groupBy (_._1) toList) map (x => (x._1, x._2.length))) filter (x => x._2 == 1)
                                                   //> res26: List[(Int, Int)] = List((5,1), (2,1), (7,1), (3,1))
+
+
+
+// generators
+
+trait Generator[+T] {
+  self =>
+	def generate: T
+	def map[S](f: T => S): Generator[S] = new Generator[S] {
+			def generate = f(self.generate)
+		}
+}
+
+val integers = new Generator[Int] {
+	val rand = new java.util.Random
+	def generate = rand.nextInt()
+}                                                 //> integers  : week1.Generator[Int]{val rand: java.util.Random} = week1$$anonf
+                                                  //| un$main$1$$anon$2@3c0ecd4b
+
+integers.generate                                 //> res27: Int = 2086505100
+
+val booleans = new Generator[Boolean] {
+	def generate = integers.generate > 0
+}                                                 //> booleans  : week1.Generator[Boolean] = week1$$anonfun$main$1$$anon$3@14bf97
+                                                  //| 59
+
+booleans.generate                                 //> res28: Boolean = true
+
+val b = integers map {x => x > 0}                 //> b  : week1.Generator[Boolean] = week1$$anonfun$main$1$Generator$1$$anon$1@5
+                                                  //| f341870
+b.generate                                        //> res29: Boolean = true
+
+
+
+
+
+
+
 }
