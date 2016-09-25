@@ -49,27 +49,22 @@ object week1 {
                                                   //| List(Abelson, Harald, Sussman, Gerald, Spoon, Lex)), Book(F Programming,Lis
                                                   //| t(Bird, Harald, Wadler, Gerald, Spoon, Lex)), Book(Scala,List(Odersky, Mart
                                                   //| in, Spoon, Lex)))
-  
-  
-  
+
   for (b <- books; a <- b.authors; if a startsWith "Bird,")
     yield b.title                                 //> res9: scala.collection.immutable.Set[String] = Set(F Programming)
 
-	books
-		.flatMap(b => for (a <- b.authors; if a startsWith "Bird,") yield b.title)
+  books
+    .flatMap(b => for (a <- b.authors; if a startsWith "Bird,") yield b.title)
                                                   //> res10: scala.collection.immutable.Set[String] = Set(F Programming)
-	books.flatMap(b =>
-		for (a <- b.authors withFilter( x => x startsWith "Spoon,")) yield b.title
-	)                                         //> res11: scala.collection.immutable.Set[String] = Set(SIC Program, F Programm
+  books.flatMap(b =>
+    for (a <- b.authors withFilter (x => x startsWith "Spoon,")) yield b.title)
+                                                  //> res11: scala.collection.immutable.Set[String] = Set(SIC Program, F Programm
                                                   //| ing, Scala)
-	
-	
-	books
-		.flatMap(b => b.authors withFilter (x => x startsWith "Spoon,") map ( y => b.title))
+
+  books
+    .flatMap(b => b.authors withFilter (x => x startsWith "Spoon,") map (y => b.title))
                                                   //> res12: scala.collection.immutable.Set[String] = Set(SIC Program, F Programm
                                                   //| ing, Scala)
-	
-	
 
   for (b <- books if (b.title indexOf "Program") >= 0)
     yield b.title                                 //> res13: scala.collection.immutable.Set[String] = Set(SIC Program, F Programm
@@ -140,7 +135,7 @@ object week1 {
                                                   //| ), (4,2), (4,4), (5,5), (6,2), (6,3), (6,6), (7,7), (8,2), (8,4), (8,8), (9
                                                   //| ,3), (9,9), (10,2), (10,5), (10,10))
   (2 to 10).flatMap(x =>
-  	for (y <- 2 to x; if (x % y == 0)) yield (x, y))
+    for (y <- 2 to x; if (x % y == 0)) yield (x, y))
                                                   //> res24: scala.collection.immutable.IndexedSeq[(Int, Int)] = Vector((2,2), (3
                                                   //| ,3), (4,2), (4,4), (5,5), (6,2), (6,3), (6,6), (7,7), (8,2), (8,4), (8,8), 
                                                   //| (9,3), (9,9), (10,2), (10,5), (10,10))
@@ -150,48 +145,160 @@ object week1 {
       map (z => (x, z)))                          //> res25: scala.collection.immutable.IndexedSeq[(Int, Int)] = Vector((2,2), (3
                                                   //| ,3), (4,2), (4,4), (5,5), (6,2), (6,3), (6,6), (7,7), (8,2), (8,4), (8,8), 
                                                   //| (9,3), (9,9), (10,2), (10,5), (10,10))
-     
-     
 
   // get all the primes
   ((d groupBy (_._1) toList) map (x => (x._1, x._2.length))) filter (x => x._2 == 1)
                                                   //> res26: List[(Int, Int)] = List((5,1), (2,1), (7,1), (3,1))
 
+  // generators
 
+  trait Generator[+T] {
+    self =>
+    def generate: T
+    def map[S](f: T => S): Generator[S] = new Generator[S] {
+      def generate = f(self.generate)
+    }
+    def flatMap[S](f: T => Generator[S]): Generator[S] = new Generator[S] {
+      def generate = f(self.generate).generate
+    }
 
-// generators
+    //override def toString: String
 
-trait Generator[+T] {
-  self =>
-	def generate: T
-	def map[S](f: T => S): Generator[S] = new Generator[S] {
-			def generate = f(self.generate)
-		}
-}
+  }
 
-val integers = new Generator[Int] {
-	val rand = new java.util.Random
-	def generate = rand.nextInt()
-}                                                 //> integers  : week1.Generator[Int]{val rand: java.util.Random} = week1$$anonf
-                                                  //| un$main$1$$anon$2@3c0ecd4b
+  val integers = new Generator[Int] {
+    val rand = new java.util.Random
+    def generate = rand.nextInt()
+  }                                               //> integers  : week1.Generator[Int]{val rand: java.util.Random} = week1$$anonf
+                                                  //| un$main$1$$anon$3@3c0ecd4b
 
-integers.generate                                 //> res27: Int = 2086505100
+  integers.generate                               //> res27: Int = 575306270
 
-val booleans = new Generator[Boolean] {
-	def generate = integers.generate > 0
-}                                                 //> booleans  : week1.Generator[Boolean] = week1$$anonfun$main$1$$anon$3@14bf97
+  val booleans = new Generator[Boolean] {
+    def generate = integers.generate > 0
+  }                                               //> booleans  : week1.Generator[Boolean] = week1$$anonfun$main$1$$anon$4@14bf97
                                                   //| 59
 
-booleans.generate                                 //> res28: Boolean = true
+  booleans.generate                               //> res28: Boolean = true
 
-val b = integers map {x => x > 0}                 //> b  : week1.Generator[Boolean] = week1$$anonfun$main$1$Generator$1$$anon$1@5
+  val b = integers map { x => x > 0 }             //> b  : week1.Generator[Boolean] = week1$$anonfun$main$1$Generator$1$$anon$1@5
                                                   //| f341870
-b.generate                                        //> res29: Boolean = true
+  b.generate                                      //> res29: Boolean = true
 
+  val c = new Generator[Boolean] {
+    def generate = ((x: Int) => x > 0)(integers.generate)
+  }                                               //> c  : week1.Generator[Boolean] = week1$$anonfun$main$1$$anon$5@553f17c
 
+  c.generate                                      //> res30: Boolean = true
 
+  def single[T](x: T): Generator[T] = new Generator[T] {
+    def generate = x
+  }                                               //> single: [T](x: T)week1.Generator[T]
 
+  single(3).generate                              //> res31: Int = 3
 
+  def choose(lo: Int, hi: Int): Generator[Int] = {
+    def toString = this + ""
+    for (x <- integers) yield lo + (if (x > 0) x else -x) % (hi - lo)
 
+  }                                               //> choose: (lo: Int, hi: Int)week1.Generator[Int]
 
+  choose(1, 10).generate                          //> res32: Int = 1
+
+  def choose2(lo: Int, hi: Int): Generator[Int] =
+    new Generator[Int] {
+      def generate = ((x: Int) => lo + ((if (x > 0) x else -x) % (hi - lo)))(integers.generate)
+    }                                             //> choose2: (lo: Int, hi: Int)week1.Generator[Int]
+
+  choose2(1, 10).generate                         //> res33: Int = 3
+
+  def oneOf[T](xs: T*): Generator[T] =
+    for (idx <- choose(0, xs.length)) yield xs(idx)
+                                                  //> oneOf: [T](xs: T*)week1.Generator[T]
+
+  oneOf("r", "g", "b").generate                   //> res34: String = b
+
+  def lists: Generator[List[Int]] = for {
+    isEmpty <- booleans
+    list <- (if (isEmpty) emptyLists else nonEmptyLists)
+  } yield list                                    //> lists: => week1.Generator[List[Int]]
+
+  def emptyLists = single(Nil)                    //> emptyLists: => week1.Generator[scala.collection.immutable.Nil.type]
+  def nonEmptyLists = for {
+    head <- integers
+    tail <- lists
+  } yield head :: tail                            //> nonEmptyLists: => week1.Generator[List[Int]]
+
+  lists.generate                                  //> res35: List[Int] = List()
+
+  //sealed abstract class Tree
+  //case class Node(left: Tree, right: Tree) extends Tree
+  //case class Leaf[A](value: A) extends Tree
+  //case object EmptyLeaf extends Tree
+
+  //val treeA = Node(EmptyLeaf, Leaf(5))
+  //val treeB = Node(Node(Leaf(2), Leaf(3)), Leaf(5))
+
+  trait Tree
+  case class Leaf(x: Int) extends Tree
+  case class Inner(left: Tree, right: Tree) extends Tree
+
+def leafs: Generator[Leaf] =
+new Generator[Leaf] {
+     def generate = Leaf(choose(1,10).generate)
+}                                                 //> leafs: => week1.Generator[week1.Leaf]
+  // generate leaves
+ // def leafs: Generator[Leaf] =
+ // for {
+ //   x <- integers
+ //     } yield Leaf(x)
+
+  def inners: Generator[Inner] = for {
+    l <- trees
+    r <- trees
+      _ = print("l is "+l+"\n")
+      _ = print("r is "+r+"\n")
+  } yield Inner(l, r)                             //> inners: => week1.Generator[week1.Inner]
+
+  def trees: Generator[Tree] = for {
+    isLeaf <- booleans
+    tree <- if (isLeaf) leafs else inners
+  
+  } yield tree                                    //> trees: => week1.Generator[week1.Tree]
+
+  leafs.generate                                  //> res36: week1.Leaf = Leaf(5)
+  inners.generate                                 //> l is Leaf(2)
+                                                  //| r is Leaf(2)
+                                                  //| l is Leaf(7)
+                                                  //| r is Inner(Leaf(2),Leaf(2))
+                                                  //| l is Leaf(4)
+                                                  //| r is Leaf(5)
+                                                  //| l is Inner(Leaf(4),Leaf(5))
+                                                  //| r is Leaf(3)
+                                                  //| l is Leaf(9)
+                                                  //| r is Leaf(9)
+                                                  //| l is Leaf(7)
+                                                  //| r is Leaf(8)
+                                                  //| l is Inner(Leaf(7),Leaf(8))
+                                                  //| r is Leaf(9)
+                                                  //| l is Leaf(1)
+                                                  //| r is Leaf(9)
+                                                  //| l is Leaf(6)
+                                                  //| r is Inner(Leaf(1),Leaf(9))
+                                                  //| l is Leaf(9)
+                                                  //| r is Leaf(2)
+                                                  //| l is Inner(Leaf(9),Leaf(2))
+                                                  //| r is Leaf(9)
+                                                  //| l is Inner(Leaf(6),Inner(Leaf(1),Leaf(9)))
+                                                  //| r is Inner(Inner(Leaf(9),Leaf(2)),Leaf(9))
+                                                  //| l is Inner(Inner(Leaf(6),Inner(Leaf(1),Leaf(9))),Inner(Inner(Leaf(9),Leaf(2
+                                                  //| )),Leaf(9)))
+                                                  //| r is Leaf(7)
+                                                  //| l is Inner(Inner(Leaf(7),Leaf(8)),Leaf(9))
+                                                  //| r is Inner(Inner(Inner(Leaf(6),Inner(Leaf(1),Leaf(9))),Inner(Inner(Leaf(9),
+                                                  //| Leaf(2)),Leaf(9))),Leaf(7))
+                                                  //| l is Leaf(2)
+                                                  //| r is Inner(Inner(Inner(Leaf(7),Leaf(8)),Leaf(9)),Inner(Inner(Inner(Leaf(6),
+                                                  //| Inner(Leaf(1),Leaf(9))),Inner(Inner(Leaf(9),Leaf(2
+                                                  //| Output exceeds cutoff limit.
 }
