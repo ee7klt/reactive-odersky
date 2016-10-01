@@ -172,14 +172,19 @@ object week1 {
   }                                               //> integers  : week1.Generator[Int]{val rand: java.util.Random} = week1$$anonf
                                                   //| un$main$1$$anon$3@3c0ecd4b
 
-  integers.generate                               //> res27: Int = 575306270
+  integers.generate                               //> res27: Int = 1041473416
 
   val booleans = new Generator[Boolean] {
     def generate = integers.generate > 0
   }                                               //> booleans  : week1.Generator[Boolean] = week1$$anonfun$main$1$$anon$4@14bf97
                                                   //| 59
+def pairs [T,U](t: Generator[T], u: Generator[U]) = for {
+	x <- t
+	y <- u
+} yield (x,y)                                     //> pairs: [T, U](t: week1.Generator[T], u: week1.Generator[U])week1.Generator[
+                                                  //| (T, U)]
 
-  booleans.generate                               //> res28: Boolean = true
+  booleans.generate                               //> res28: Boolean = false
 
   val b = integers map { x => x > 0 }             //> b  : week1.Generator[Boolean] = week1$$anonfun$main$1$Generator$1$$anon$1@5
                                                   //| f341870
@@ -210,13 +215,13 @@ object week1 {
       def generate = ((x: Int) => lo + ((if (x > 0) x else -x) % (hi - lo)))(integers.generate)
     }                                             //> choose2: (lo: Int, hi: Int)week1.Generator[Int]
 
-  choose2(1, 10).generate                         //> res33: Int = 3
+  choose2(1, 10).generate                         //> res33: Int = 7
 
   def oneOf[T](xs: T*): Generator[T] =
     for (idx <- choose(0, xs.length)) yield xs(idx)
                                                   //> oneOf: [T](xs: T*)week1.Generator[T]
 
-  oneOf("r", "g", "b").generate                   //> res34: String = b
+  oneOf("r", "g", "b").generate                   //> res34: String = r
 
   def lists: Generator[List[Int]] = for {
     isEmpty <- booleans
@@ -229,7 +234,7 @@ object week1 {
     tail <- lists
   } yield head :: tail                            //> nonEmptyLists: => week1.Generator[List[Int]]
 
-  lists.generate                                  //> res35: List[Int] = List()
+  lists.generate                                  //> res35: List[Int] = List(-1987607792, 1974193190, 1758568545)
 
   //sealed abstract class Tree
   //case class Node(left: Tree, right: Tree) extends Tree
@@ -256,8 +261,8 @@ new Generator[Leaf] {
   def inners: Generator[Inner] = for {
     l <- trees
     r <- trees
-      _ = print("l is "+l+"\n")
-      _ = print("r is "+r+"\n")
+     // _ = print("l is "+l+"\n")
+   //   _ = print("r is "+r+"\n")
   } yield Inner(l, r)                             //> inners: => week1.Generator[week1.Inner]
 
   def trees: Generator[Tree] = for {
@@ -266,39 +271,22 @@ new Generator[Leaf] {
   
   } yield tree                                    //> trees: => week1.Generator[week1.Tree]
 
-  leafs.generate                                  //> res36: week1.Leaf = Leaf(5)
-  inners.generate                                 //> l is Leaf(2)
-                                                  //| r is Leaf(2)
-                                                  //| l is Leaf(7)
-                                                  //| r is Inner(Leaf(2),Leaf(2))
-                                                  //| l is Leaf(4)
-                                                  //| r is Leaf(5)
-                                                  //| l is Inner(Leaf(4),Leaf(5))
-                                                  //| r is Leaf(3)
-                                                  //| l is Leaf(9)
-                                                  //| r is Leaf(9)
-                                                  //| l is Leaf(7)
-                                                  //| r is Leaf(8)
-                                                  //| l is Inner(Leaf(7),Leaf(8))
-                                                  //| r is Leaf(9)
-                                                  //| l is Leaf(1)
-                                                  //| r is Leaf(9)
-                                                  //| l is Leaf(6)
-                                                  //| r is Inner(Leaf(1),Leaf(9))
-                                                  //| l is Leaf(9)
-                                                  //| r is Leaf(2)
-                                                  //| l is Inner(Leaf(9),Leaf(2))
-                                                  //| r is Leaf(9)
-                                                  //| l is Inner(Leaf(6),Inner(Leaf(1),Leaf(9)))
-                                                  //| r is Inner(Inner(Leaf(9),Leaf(2)),Leaf(9))
-                                                  //| l is Inner(Inner(Leaf(6),Inner(Leaf(1),Leaf(9))),Inner(Inner(Leaf(9),Leaf(2
-                                                  //| )),Leaf(9)))
-                                                  //| r is Leaf(7)
-                                                  //| l is Inner(Inner(Leaf(7),Leaf(8)),Leaf(9))
-                                                  //| r is Inner(Inner(Inner(Leaf(6),Inner(Leaf(1),Leaf(9))),Inner(Inner(Leaf(9),
-                                                  //| Leaf(2)),Leaf(9))),Leaf(7))
-                                                  //| l is Leaf(2)
-                                                  //| r is Inner(Inner(Inner(Leaf(7),Leaf(8)),Leaf(9)),Inner(Inner(Inner(Leaf(6),
-                                                  //| Inner(Leaf(1),Leaf(9))),Inner(Inner(Leaf(9),Leaf(2
-                                                  //| Output exceeds cutoff limit.
+  leafs.generate                                  //> res36: week1.Leaf = Leaf(2)
+  inners.generate                                 //> res37: week1.Inner = Inner(Leaf(6),Inner(Inner(Leaf(9),Leaf(5)),Leaf(8)))
+  
+  
+  def test[T](g: Generator[T], numTimes: Int = 100)
+  (a: T => Boolean): Unit = {
+  	for (i<-0 until numTimes) {
+  		val value = g.generate
+  		assert(a(value), "test failed for "+ value)
+  	}
+  	println("Passed "+numTimes+" tests")
+  }                                               //> test: [T](g: week1.Generator[T], numTimes: Int)(a: T => Boolean)Unit
+  
+  test(pairs(lists,lists),5) {
+  	case (xs,ys) => (xs++ys).length >= xs.length
+  }                                               //> Passed 5 tests
+  
+  
 }
