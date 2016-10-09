@@ -1,11 +1,11 @@
 
 
 class Pouring(capacity: Vector[Int]) {
-  // States
+  // States: the 'fullness' of each glass
   type State = Vector[Int]
   val initialState = capacity map (x => 0)
   
-  // Moves
+  // Moves: Empty, Fill, Pour
   trait Move {
     def change(state: State): State 
   }
@@ -25,6 +25,8 @@ class Pouring(capacity: Vector[Int]) {
   }
   
  
+  
+  // All possible moves
   val glasses = 0 until capacity.length
   
   val moves = 
@@ -33,11 +35,50 @@ class Pouring(capacity: Vector[Int]) {
    (for (from <- glasses; to <- glasses if from != to) yield Pour(from,to))
   
    
-   // Paths
-   class Path(history: List[Move]) {
-    def endState: State = (history foldRight initialState)(_ change _)
-  }
+   // Path: sequence of moves
+   // endState: final state after all moves are applied to initial state
+   // extend: extend Path by one more move
    
+   class Path(history: List[Move]) {
+    // endState is final state after applying all sequential moves to the initialState
+    def endState: State = (history foldRight initialState)(_ change _)
+    def extend(move: Move) = new Path(move :: history)
+    // print a list with space between elements
+    override def toString = (history.reverse mkString " ") + "--> " + endState
+  }
+  
+  // InitialPath has no moves on it
+  val initialPath = new Path(Nil)
+  
+  // get the next longest path from current path
+  def from(paths: Set[Path], explored: Set[State]): Stream[Set[Path]] =
+    if (paths.isEmpty) Stream.empty  // nothing to evolve  
+    else {
+      // more is current set of paths, each extended by exactly one extra move
+      val more = for {
+        path <- paths
+        next <- moves map path.extend
+        if !(explored contains next.endState)
+      } yield next
+      // return a stream of paths 
+      paths #:: from(more, explored ++ (more map (_.endState)))
+    }
+ 
+  val pathSets = from(Set(initialPath), Set(initialState))  
+  // but how does it get out of the Nil state? won't it always see the path as empty and return Stream.empty?
+  // wait, but maybe Path(Nil) isn't empty?
+  // yes of course it's not!! it's a Nil stream, which is something! not nothing!
+  // because if i did from Set(), THAT would return empty stream! 
+  
+  def solutions(target: Int): Stream[Path] = 
+    for {
+      pathSet <- pathSets
+      path <- pathSet
+       if (path.endState contains target)      
+    } yield path
+  
+    
+    
 }
 
 
