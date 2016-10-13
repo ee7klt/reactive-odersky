@@ -39,16 +39,15 @@ class Pouring(capacity: Vector[Int]) {
    // endState: final state after all moves are applied to initial state
    // extend: extend Path by one more move
    
-   class Path(history: List[Move]) {
+   class Path(history: List[Move], val endState: State) {
     // endState is final state after applying all sequential moves to the initialState
-    def endState: State = (history foldRight initialState)(_ change _)
-    def extend(move: Move) = new Path(move :: history)
+    def extend(move: Move) = new Path(move :: history, move change endState )
     // print a list with space between elements
     override def toString = (history.reverse mkString " ") + "--> " + endState
   }
   
   // InitialPath has no moves on it
-  val initialPath = new Path(Nil)
+  val initialPath = new Path(Nil, initialState)
   
   // get the next longest path from current path
   def from(paths: Set[Path], explored: Set[State]): Stream[Set[Path]] =
@@ -78,6 +77,8 @@ class Pouring(capacity: Vector[Int]) {
     } yield path
   
     
+    
+   
     
 }
 
