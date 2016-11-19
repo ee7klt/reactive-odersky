@@ -56,11 +56,11 @@ class Pouring(capacity: Vector[Int]) {
       // more is current set of paths, each extended by exactly one extra move
       val more = for {
         path <- paths
-        next <- moves map path.extend
-        if !(explored contains next.endState) //path included in stream only if it has not been explored.
-      } yield next
+        next <- moves map path.extend   // extend the path by one more move. path length is now n+1
+        if !(explored contains next.endState) //path included in stream only if it does not lead to an endState that has already been explored.
+      } yield next  // a set of paths. for-ex always concatenates results from each pass thru loop
       // return a stream of paths. 
-      paths #:: from(more, explored ++ (more map (_.endState)))
+      paths #:: from(more, explored ++ (more map (_.endState)))  // recursive call concat using stream concat
     }
  
   val pathSets = from(Set(initialPath), Set(initialState))  

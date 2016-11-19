@@ -10,6 +10,7 @@ object testpour {
   problem.solutions(6)                            //> res3: Stream[testpour.problem.Path] = Stream(Fill(1) Pour(1,0) Empty(0) Pour
                                                   //| (1,0) Empty(0) Pour(1,0) Fill(1) Pour(1,0)--> Vector(4, 6), ?)
 
-  List(1, 2, 3) apply 1                           //> res4: Int = 2
+  List(1, 2, 3) apply 1
+  //> res4: Int = 2
 
 }
