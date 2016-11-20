@@ -1,9 +1,7 @@
 package week3
 
-/**
-  * Created by macgeekalex on 11/19/16.
-  */
-class Gates {
+
+abstract class Gates extends Simulation {
 
   def InverterDelay: Int
   def AndGateDelay: Int
@@ -15,16 +13,21 @@ class Gates {
     private var actions: List[Action] = List()
 
     def getSignal: Boolean = sigVal
-    def setSignal(s: Boolean): Unit = {
+    def setSignal(s: Boolean): Unit =
       if (s != sigVal) {
         sigVal = s
-        actions foreach( _() )
+        actions foreach (_())
       }
-    }
+
     def addAction(a: Action): Unit = {
       actions = a::actions
       a()
     }
+
+  }
+
+
+
 
     def inverter(input: Wire, output: Wire): Unit = {
       def invertAction(): Unit = {
@@ -47,7 +50,7 @@ class Gates {
     }
 
 
-    def orGate(in1: Wire, in2: Wire, output: Wire): Unit = {
+    def orGateAlt(in1: Wire, in2: Wire, output: Wire): Unit = {
       def orAction(): Unit = {
         val in1Sig = in1.getSignal
         val in2Sig = in2.getSignal
@@ -57,6 +60,15 @@ class Gates {
       in1 addAction orAction
       in2 addAction orAction
     }
+    
+    def orGate(in1: Wire, in2: Wire, output: Wire): Unit = {
+      val notIn1, notIn2, notOut = new Wire
+      inverter(in1, notIn1); inverter(in2, notIn2)
+      andGate(notIn1, notIn2, notOut)
+      inverter(notOut, output)
+    }
+    
+    
 
     def probe(name: String, wire: Wire): Unit = {
       def probeAction(): Unit = {
@@ -66,5 +78,5 @@ class Gates {
     }
 
 
-  }
+
 }

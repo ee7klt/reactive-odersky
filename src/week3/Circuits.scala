@@ -3,7 +3,12 @@ package week3
 
 /**
   * Created by macgeekalex on 11/19/16.
+
+
   */
+
+
+
 abstract class Circuits extends Gates {
 
   def halfAdder(a: Wire, b: Wire, s: Wire, c: Wire) {
@@ -19,7 +24,6 @@ abstract class Circuits extends Gates {
     halfAdder(a, cin, s, c1)
     halfAdder(b, s, sum, c2)
     orGate(c1, c2, cout)
-    )
   }
 
 }

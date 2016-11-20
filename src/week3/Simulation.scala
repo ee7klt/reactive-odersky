@@ -3,7 +3,7 @@ package week3
 /**
   * Created by macgeekalex on 11/19/16.
   */
-class Simulation {
+abstract class Simulation {
 
   type Action = () => Unit
 

@@ -4,7 +4,7 @@ object week3 {
   problem.moves                                   //> res0: scala.collection.immutable.IndexedSeq[Product with Serializable with w
                                                   //| eek3.problem.Move] = Vector(Empty(0), Empty(1), Fill(0), Fill(1), Pour(0,1),
                                                   //|  Pour(1,0))
-  List(1, 2, 3) apply 1                           //> res1: Int = 2
+  List(1, 2, 3) apply 2                           //> res1: Int = 2
 
   class BankAccount {
     private var balance = 0
