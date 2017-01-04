@@ -1,4 +1,4 @@
-package week3
+import week3._
 
 object test{
   println("Welcome")                              //> Welcome
